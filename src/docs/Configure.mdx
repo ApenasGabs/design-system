@@ -1,0 +1,40 @@
+import {
+  Meta,
+  Story,
+  Canvas,
+  Title,
+  Subtitle,
+  Description,
+  Primary,
+  Controls,
+  Stories,
+} from "@storybook/blocks";
+
+<Meta title="Documentation/Configuration" />
+
+# Design System Documentation
+
+<div
+  style={{
+    margin: "2rem 0",
+    padding: "1rem",
+    background: "#f8f8f8",
+    borderRadius: "4px",
+    maxWidth: "800px",
+  }}
+>
+  Welcome to our Design System - a collection of reusable components, guidelines
+  and resources.
+</div>
+
+## Getting Started
+
+Use our components in your project by importing them:
+
+```jsx
+import { Button } from "./components/atoms/Button";
+
+function MyComponent() {
+  return <Button>Click me</Button>;
+}
+```

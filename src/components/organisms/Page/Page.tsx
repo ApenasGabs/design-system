@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Header } from "./Header";
+import { Header } from "../../molecules/Header";
 import "./page.css";
 
 type User = {

@@ -3,6 +3,6 @@
   "outputDirectory": "dist",
   "routes": [
     { "src": "/storybook/(.*)", "dest": "/storybook/$1" },
-    { "src": "/", "status": 301, "headers": { "Location": "/storybook" } }
+    { "src": "/", "status": 301, "headers": { "Location": "/storybook/" } }
   ]
 }
