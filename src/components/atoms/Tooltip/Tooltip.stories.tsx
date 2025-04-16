@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Tooltip } from ".";
+import { FollowTooltip, Tooltip } from ".";
 
 // Required default export defining component metadata
 const meta = {
@@ -25,4 +25,16 @@ export const Default: Story = {
   },
 };
 
-// Add more story variants as needed
+type FollowTooltipStory = StoryObj<typeof FollowTooltip>;
+
+export const CursorFollowing: FollowTooltipStory = {
+  render: () => <FollowTooltip tooltip="batatatatata" />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A tooltip that follows your cursor using the Radix UI tooltip component",
+      },
+    },
+  },
+};

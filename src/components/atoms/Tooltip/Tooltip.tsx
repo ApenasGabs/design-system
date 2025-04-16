@@ -1,84 +1,126 @@
 import React, { useEffect, useRef, useState } from "react";
 
-type TooltipProps = {
-  content: string;
+interface TooltipProps {
+  content: React.ReactNode;
   children: React.ReactNode;
-};
+  defaultPosition?: "top" | "bottom" | "left" | "right";
+  gap?: number;
+}
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
+export const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  children,
+  defaultPosition = "bottom",
+  gap = 8,
+}) => {
   const [visible, setVisible] = useState(false);
+  const [position, setPosition] = useState(defaultPosition);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<React.CSSProperties>({});
 
-  const updatePosition = () => {
-    const trigger = triggerRef.current;
-    const tooltip = tooltipRef.current;
-
-    if (trigger && tooltip) {
-      const triggerRect = trigger.getBoundingClientRect();
-      const tooltipRect = tooltip.getBoundingClientRect();
-
-      const space = {
-        top: triggerRect.top,
-        bottom: window.innerHeight - triggerRect.bottom,
-        left: triggerRect.left,
-        right: window.innerWidth - triggerRect.right,
-      };
-
-      const fits = {
-        top: space.top >= tooltipRect.height + 8,
-        bottom: space.bottom >= tooltipRect.height + 8,
-        left: space.left >= tooltipRect.width + 8,
-        right: space.right >= tooltipRect.width + 8,
-      };
-
-      let top = 0;
-      let left = 0;
-
-      if (fits.bottom || (!fits.top && space.bottom > space.top)) {
-        // Prefer bottom
-        top = triggerRect.bottom + 8;
-        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
-      } else if (fits.top) {
-        top = triggerRect.top - tooltipRect.height - 8;
-        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
-      } else if (fits.right || space.right > space.left) {
-        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.right + 8;
-      } else {
-        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.left - tooltipRect.width - 8;
-      }
-
-      left = Math.max(
-        8,
-        Math.min(left, window.innerWidth - tooltipRect.width - 8)
-      );
-      top = Math.max(
-        8,
-        Math.min(top, window.innerHeight - tooltipRect.height - 8)
-      );
-
-      setStyle({
-        position: "fixed",
-        top,
-        left,
-        backgroundColor: "#333",
-        color: "#fff",
-        padding: "8px 12px",
-        borderRadius: "4px",
-        fontSize: "14px",
-        zIndex: 1000,
-        maxWidth: "220px",
-        pointerEvents: "none",
-        boxShadow: "0px 2px 8px rgba(0,0,0,0.2)",
-        whiteSpace: "pre-wrap",
-      });
-    }
-  };
-
+  console.log("position: ", position);
   useEffect(() => {
+    const updatePosition = () => {
+      if (triggerRef.current && tooltipRef.current) {
+        const triggerRect = triggerRef.current.getBoundingClientRect();
+        const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+        // Get window dimensions
+        const windowHeight = window.innerHeight;
+        const windowWidth = window.innerWidth;
+
+        // Calculate available space in each direction
+        const spaceTop = triggerRect.top;
+        const spaceBottom = windowHeight - triggerRect.bottom;
+        const spaceLeft = triggerRect.left;
+        const spaceRight = windowWidth - triggerRect.right;
+
+        // Determine best position based on available space
+        let bestPosition = defaultPosition;
+
+        // If default position is bottom but not enough space, find alternative
+        if (
+          defaultPosition === "bottom" &&
+          spaceBottom < tooltipRect.height + gap
+        ) {
+          // Try top if there's more space
+          if (spaceTop > tooltipRect.height + gap) {
+            bestPosition = "top";
+          } else if (
+            spaceRight > tooltipRect.width + gap &&
+            spaceRight > spaceLeft
+          ) {
+            bestPosition = "right";
+          } else if (spaceLeft > tooltipRect.width + gap) {
+            bestPosition = "left";
+          }
+        }
+        // Similar logic for other default positions
+        else if (
+          defaultPosition === "top" &&
+          spaceTop < tooltipRect.height + gap
+        ) {
+          if (spaceBottom > tooltipRect.height + gap) {
+            bestPosition = "bottom";
+          } else if (
+            spaceRight > tooltipRect.width + gap &&
+            spaceRight > spaceLeft
+          ) {
+            bestPosition = "right";
+          } else if (spaceLeft > tooltipRect.width + gap) {
+            bestPosition = "left";
+          }
+        }
+        // Add similar checks for left/right default positions if needed
+
+        setPosition(bestPosition);
+
+        // Calculate position based on best direction
+        let newStyle: React.CSSProperties = {
+          position: "absolute",
+          zIndex: 1000,
+        };
+
+        switch (bestPosition) {
+          case "bottom":
+            newStyle = {
+              ...newStyle,
+              top: triggerRect.height + gap,
+              left: "50%",
+              transform: "translateX(-50%)",
+            };
+            break;
+          case "top":
+            newStyle = {
+              ...newStyle,
+              bottom: triggerRect.height + gap,
+              left: "50%",
+              transform: "translateX(-50%)",
+            };
+            break;
+          case "left":
+            newStyle = {
+              ...newStyle,
+              right: triggerRect.width + gap,
+              top: "50%",
+              transform: "translateY(-50%)",
+            };
+            break;
+          case "right":
+            newStyle = {
+              ...newStyle,
+              left: triggerRect.width + gap,
+              top: "50%",
+              transform: "translateY(-50%)",
+            };
+            break;
+        }
+
+        setStyle(newStyle);
+      }
+    };
+
     if (visible) {
       updatePosition();
       window.addEventListener("scroll", updatePosition, true);
@@ -89,7 +131,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
       window.removeEventListener("scroll", updatePosition, true);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [visible]);
+  }, [visible, defaultPosition, gap]);
 
   return (
     <div
