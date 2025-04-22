@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Button } from "../Button";
+import { Chrome } from "./Chrome";
 import { Popover } from "./Popover";
 
 // Required default export defining component metadata
@@ -13,7 +14,6 @@ const meta: Meta<typeof Popover> = {
   args: {
     children: <button>Hover ou toque aqui</button>,
   },
-  // Add any argTypes configuration if needed
 } satisfies Meta<typeof Popover>;
 
 export default meta;
@@ -23,11 +23,23 @@ type Story = StoryObj<typeof Popover>;
 
 export const Default: Story = {
   render: () => (
-    <Popover
-      popoverContent={<div>Este é um popover que se adapta à tela!</div>}
-    >
-      <Button label={"Popover"} />
-    </Popover>
+    <Chrome center scrollable="both" scrollHeight={40} scrollWidth={200}>
+      <div
+        style={{
+          width: "300px",
+          height: "200px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Popover
+          popoverContent={<div>Este é um popover que se adapta à tela!</div>}
+        >
+          <Button label={"Popover"} />
+        </Popover>
+      </div>
+    </Chrome>
   ),
 };
 

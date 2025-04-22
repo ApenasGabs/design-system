@@ -1,23 +1,45 @@
-import { ComponentProps, FC, ReactNode, useState } from "react";
-import "./popover.css";
+import {
+  Placement,
+  flip,
+  offset,
+  shift,
+  useFloating,
+} from "@floating-ui/react-dom";
+import { FC, ReactNode, useState } from "react";
 
-type PopoverProps = ComponentProps<"div"> & {
+type PopoverProps = {
   children: ReactNode;
   popoverContent: ReactNode;
+  placement?: Placement;  
 };
 
-export const Popover: FC<PopoverProps> = ({ children, popoverContent }) => {
-  const [visible, setVisible] = useState(false);
+export const Popover: FC<PopoverProps> = ({
+  children,
+  popoverContent,
+  placement = "bottom",
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const { refs, floatingStyles } = useFloating({
+    placement,
+    open,
+    middleware: [offset(8), flip(), shift()],
+  });
 
   return (
     <div
-      className="popover"
-      style={{ display: "inline-block", position: "relative" }}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
+      ref={refs.setReference}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      style={{ display: "inline-block" }}
     >
       {children}
-      {visible && <div className="popover-content">{popoverContent}</div>}
+
+      {open && (
+        <div ref={refs.setFloating} style={{ ...floatingStyles, zIndex: 999 }}>
+          {popoverContent}
+        </div>
+      )}
     </div>
   );
 };
